@@ -73,8 +73,13 @@ class Ball():
         if self.rect.top > screen_height:
             self.speedY *= -1
 
+        ####
+        # Add proper collision detection HERE
+        
         if self.rect.colliderect(player_paddle) or self.rect.colliderect(ai_paddle):
             self.speedX *= -1
+            
+        ####
 
         if self.rect.left < 0:
             self.winner = 1
