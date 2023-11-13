@@ -57,6 +57,8 @@ player_paddle = Paddle(screen_width - 40, screen_height // 2)
 ai_paddle = Paddle(20, screen_height // 2)
 
 
+
+
 run = True
 while run:
 
