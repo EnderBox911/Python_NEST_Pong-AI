@@ -9,6 +9,7 @@ screen = pyg.display.set_mode((screen_width, screen_height))
 
 player = pyg.Rect((300, 250, 50, 50))  # x,y,width,height
 
+
 class Player:
     def __init__(self):
         player = pyg.Rect((300, 250, 50, 50))
