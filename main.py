@@ -9,15 +9,26 @@ screen = pyg.display.set_mode((screen_width, screen_height))
 
 player = pyg.Rect((300, 250, 50, 50))  # x,y,width,height
 
+
+class Player:
+    def __init__(self):
+        player = pyg.Rect((300, 250, 50, 50))
+        x = player.x
+        y = player.y
+        speed = 5
+
+
 run = True
 while run:
+    Player = Player()
     screen.fill((0, 0, 0))
 
-    pyg.draw.rect(screen, (255, 0, 0), player)  # screen,rgb,object
+    pyg.draw.rect(screen, (255, 0, 0), Player.player)  # screen,rgb,object
 
     key = pyg.key.get_pressed()
     if key[pyg.K_a]:
-        player.move_ip(-1, 0)  # x,y
+        player.move_ip(-1 * Player.speed, 0)  # x,y
+        print(player)
     if key[pyg.K_d]:
         player.move_ip(1, 0)  # x,y
     if key[pyg.K_w]:
