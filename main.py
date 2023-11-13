@@ -55,6 +55,12 @@ class Paddle:
     def draw(self):
         pyg.draw.rect(screen, white, self.rect)
 
+    def ai(self):
+        if self.rect.centery < pong.rect.top and self.rect.bottom < screen_height:
+            self.rect.move_ip(0, self.speed)
+        if self.rect.centery > pong.rect.bottom and self.rect.top > margin:
+            self.rect.move_ip(0, -1 * self.speed)
+
 
 class Ball():
     def __init__(self, x, y):
@@ -66,6 +72,9 @@ class Ball():
 
         if self.rect.top > screen_height:
             self.speedY *= -1
+
+        if self.rect.colliderect(player_paddle) or self.rect.colliderect(ai_paddle):
+            self.speedX *= -1
 
         if self.rect.left < 0:
             self.winner = 1
@@ -113,6 +122,7 @@ while run:
         winner = pong.move()
         if winner == 0:
             player_paddle.move()
+            ai_paddle.ai()
             pong.draw()
         else:
             live_ball = False
