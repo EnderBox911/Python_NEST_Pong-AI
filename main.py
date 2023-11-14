@@ -1,5 +1,6 @@
 import pygame
 import pygame as pyg
+from random import randint
 
 pyg.init()
 
@@ -41,7 +42,9 @@ class Paddle:
     def __init__(self, x, y):
         self.x = x
         self.y = y
-        self.rect = pyg.Rect((self.x, self.y, 20, 100))
+        self.width = 20
+        self.height = 100
+        self.rect = pyg.Rect((self.x, self.y, self.width, self.height))
         self.speed = 5
 
     def move(self):
@@ -57,9 +60,9 @@ class Paddle:
 
     def ai(self):
         if self.rect.centery < pong.rect.top and self.rect.bottom < screen_height:
-            self.rect.move_ip(0, self.speed)
+            self.rect.move_ip(0, self.speed + (randint(1,3)) )
         if self.rect.centery > pong.rect.bottom and self.rect.top > margin:
-            self.rect.move_ip(0, -1 * self.speed)
+            self.rect.move_ip(0, -1 * self.speed - (randint(1,3)) )
 
 
 class Ball():
@@ -78,6 +81,24 @@ class Ball():
         
         if self.rect.colliderect(player_paddle) or self.rect.colliderect(ai_paddle):
             self.speedX *= -1
+
+            paddle = player_paddle if self.rect.colliderect(player_paddle) else ai_paddle
+
+            # Middle of paddle
+            middle_y = paddle.rect.y + paddle.height / 2
+
+            # Difference in Y axis of ball to middle of paddle
+            diff_in_y = middle_y - self.rect.y
+
+            # Farther from center of paddle = the angle of y change is greater. When the ball hits the edge of the
+            # paddle, it reaches the maximum velocity
+            reducing_factor = (paddle.height/2)/self.max_vel
+
+            # Squeezes the difference in y to the range of the max velocity
+            y_vel = diff_in_y/reducing_factor
+
+            # Makes that the y velocity
+            self.speedY = -1 * y_vel
             
         ####
 
@@ -100,8 +121,9 @@ class Ball():
         self.y = y
         self.radius = 8
         self.rect = pyg.Rect((self.x, self.y, self.radius * 2, self.radius * 2))
-        self.speedX = -4
-        self.speedY = 4
+        self.speedX = -5
+        self.speedY = 5
+        self.max_vel = 5
         self.winner = 0  # 0 = player, -1 = ai
 
 
