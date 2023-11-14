@@ -3,6 +3,7 @@ from random import randint
 
 pyg.init()
 
+
 class Paddle:
     def __init__(self, x, y):
         self.x = x  # Start position
@@ -32,7 +33,7 @@ class Paddle:
             self.rect.move_ip(0, -1 * self.speed - (randint(1, 3)))
 
 
-class Ball():
+class Ball:
     def __init__(self, x, y):
         self.reset(x, y)
 
@@ -59,7 +60,7 @@ class Ball():
         if self.rect.left < 0:
             self.winner = 1
 
-        # Passes right side, ai wins round
+        # Passes right side, AI wins round
         if self.rect.right > screen_width:
             self.winner = -1
 
