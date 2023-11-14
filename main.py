@@ -70,7 +70,7 @@ class Ball():
         if self.rect.top < margin:
             self.speedY *= -1
 
-        if self.rect.top > screen_height:
+        if self.rect.bottom > screen_height:
             self.speedY *= -1
 
         if self.rect.colliderect(player_paddle) or self.rect.colliderect(ai_paddle):
@@ -130,7 +130,6 @@ while run:
                 player_score += 1
             else:
                 ai_score += 1
-
 
     for event in pyg.event.get():
         if event.type == pyg.QUIT:
