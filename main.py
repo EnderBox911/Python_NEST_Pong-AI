@@ -15,13 +15,13 @@ pyg.display.set_caption('Pong')
 
 font = pyg.font.SysFont('Constantia', 30)
 
-
+live_ball = False
 margin = 50
 ai_score = 0
 player_score = 0
 FPS = 60
 winner = 0
-live_ball = False
+speed_increase = 0
 
 
 bg = (50, 25, 50)
@@ -40,8 +40,8 @@ def draw_text(text, font, colour, x, y):
 
 class Paddle:
     def __init__(self, x, y):
-        self.x = x
-        self.y = y
+        self.x = x # Start position
+        self.y = y # Start position
         self.width = 20
         self.height = 100
         self.rect = pyg.Rect((self.x, self.y, self.width, self.height))
@@ -141,11 +141,13 @@ while run:
     draw_board()
     draw_text('AI: ' + str(ai_score), font, white, 20, 15)
     draw_text('Player: ' + str(player_score), font, white, screen_width -125, 15)
+    draw_text('BALL SPEED: ' + str(abs(pong.speedX)), font, white, screen_width // 2 - 100, 15)
 
     player_paddle.draw()
     ai_paddle.draw()
 
     if live_ball:
+        speed_increase += 1
         winner = pong.move()
         if winner == 0:
             player_paddle.move()
@@ -158,12 +160,38 @@ while run:
             else:
                 ai_score += 1
 
+    if not live_ball:
+        if winner == 0:
+            draw_text('CLICK ANYWHERE TO START', font, white, 100, screen_height // 2 - 100)
+        if winner == 1:
+            draw_text('YOU SCORED!', font, white, 220, screen_height // 2 - 100)
+            draw_text('CLICK ANYWHERE TO START', font, white, 100, screen_height // 2 - 50)
+        if winner == -1:
+            draw_text('AI SCORED!', font, white, 220, screen_height // 2 - 100)
+            draw_text('CLICK ANYWHERE TO START', font, white, 100, screen_height // 2 - 50)
+
+
     for event in pyg.event.get():
         if event.type == pyg.QUIT:
             run = False
         if event.type == pygame.MOUSEBUTTONDOWN and not live_ball:
             live_ball = True
             pong.reset(screen_width - 60, screen_height // 2 + 50)
+
+    if speed_increase > 500:
+        speed_increase = 0
+        if pong.speedX < 0:
+            pong.speedX -= 1
+        if pong.speedX > 0:
+            pong.speedX += 1
+
+        if pong.speedY < 0:
+            pong.speedY -= 1
+            pong.max_vel += 1
+        if pong.speedY > 0:
+            pong.speedY += 1
+            pong.max_vel += 1
+
 
     pyg.display.update()
 
