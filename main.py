@@ -3,10 +3,6 @@ from random import randint
 
 pyg.init()
 
-bg = (50, 25, 50)
-white = (255, 255, 255)
-
-
 class Paddle:
     def __init__(self, x, y):
         self.x = x  # Start position
@@ -25,7 +21,7 @@ class Paddle:
             self.rect.move_ip(0, self.speed)  # x,y
 
     def draw(self, screen):
-        pyg.draw.rect(screen, white, self.rect)
+        pyg.draw.rect(screen, (255, 255, 255), self.rect)
 
     def ai(self, margin, screen_height, pong):
         # Placeholder AI
@@ -97,7 +93,7 @@ class Ball():
         self.speedY = -1 * y_vel
 
     def draw(self, screen):
-        pyg.draw.circle(screen, white, (self.rect.x + self.radius, self.rect.y + self.radius), self.radius)
+        pyg.draw.circle(screen, (255, 255, 255), (self.rect.x + self.radius, self.rect.y + self.radius), self.radius)
 
 
 class Game:
@@ -117,14 +113,15 @@ class Game:
         self.font = pyg.font.SysFont('Constantia', 30)
         self.run = True
         self.white = (255, 255, 255)
+        self.bg = (50, 25, 50)
 
     def draw_text(self, text, font, colour, x, y):
         img = font.render(text, True, colour)
         self.screen.blit(img, (x, y))
 
     def draw_board(self):
-        self.screen.fill(bg)
-        pyg.draw.line(self.screen, white, (0, self.margin), (self.screen_width, self.margin))
+        self.screen.fill(self.bg)
+        pyg.draw.line(self.screen, self.white, (0, self.margin), (self.screen_width, self.margin))
 
     def create_sprites(self):
         # Instantiate the paddles and pong
