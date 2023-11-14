@@ -56,28 +56,8 @@ class Ball():
 
         # Check for paddle collision
         if self.rect.colliderect(player_paddle) or self.rect.colliderect(ai_paddle):
-            self.speedX *= -1
-
-            # Getting which paddle collided
-            paddle = player_paddle if self.rect.colliderect(player_paddle) else ai_paddle
-
-            # Finding middle of paddle
-            middle_y = paddle.rect.y + paddle.height / 2
-
-            # Difference in Y axis of ball to middle of paddle
-            diff_in_y = middle_y - self.rect.y
-
-            # Farther from center of paddle = the Y velocity is greater. When the ball hits the edge of the
-            # paddle, it reaches the maximum velocity. Finding the amount of Y velocity for each unit paddle length,
-            # meaning that if the ball hits the edge (the full length) of the paddle, it gives the maximum Y velocity
-            reducing_factor = (paddle.height/2) / self.max_Y_vel
-
-            # Squeezes the difference in y to the range of the max velocity
-            y_vel = diff_in_y/reducing_factor
-
-            # Makes that the y velocity
-            self.speedY = -1 * y_vel
-
+            self.handle_paddle_collision(player_paddle, ai_paddle)
+            
         # Passes left side, user wins round
         if self.rect.left < 0:
             self.winner = 1
@@ -92,117 +72,124 @@ class Ball():
 
         return self.winner
 
+    def handle_paddle_collision(self, player_paddle, ai_paddle:
+        self.speedX *= -1
+
+        # Getting which paddle collided
+        paddle = player_paddle if self.rect.colliderect(player_paddle) else ai_paddle
+
+        # Finding middle of paddle
+        middle_y = paddle.rect.y + paddle.height / 2
+
+        # Difference in Y axis of ball to middle of paddle
+        diff_in_y = middle_y - self.rect.y
+
+        # Farther from center of paddle = the Y velocity is greater. When the ball hits the edge of the
+        # paddle, it reaches the maximum velocity. Finding the amount of Y velocity for each unit paddle length,
+        # meaning that if the ball hits the edge (the full length) of the paddle, it gives the maximum Y velocity
+        reducing_factor = (paddle.height/2) / self.max_Y_vel
+
+        # Squeezes the difference in y to the range of the max velocity
+        y_vel = diff_in_y/reducing_factor
+
+        # Makes that the y velocity
+        self.speedY = -1 * y_vel
+        
+
     def draw(self, screen):
         pyg.draw.circle(screen, white, (self.rect.x + self.radius, self.rect.y + self.radius), self.radius)
 
 
 class Game:
-    screen_width = 600
-    screen_height = 500
-    margin = 50
-    screen = pyg.display.set_mode((screen_width, screen_height))
-    pyg.display.set_caption('Pong')
-    live_ball = False
-    ai_score = 0
-    player_score = 0
-    FPS = 60
-    winner = 0
-    speed_increase = 0
-    font = pyg.font.SysFont('Constantia', 30)
-    run = True
+    def __init__(self):
+        self.screen_width = 600
+        self.screen_height = 500
+        self.margin = 50
+        self.screen = pyg.display.set_mode((screen_width, screen_height))
+        pyg.display.set_caption('Pong')
+        self.live_ball = False
+        self.ai_score = 0
+        self.player_score = 0
+        self.FPS = 60
+        self.winner = 0
+        self.speed_increase = 0
+        self.font = pyg.font.SysFont('Constantia', 30)
+        self.run = True
 
-    @classmethod
-    def draw_text(cls, text, font, colour, x, y):
+    def draw_text(self, text, font, colour, x, y):
         img = font.render(text, True, colour)
-        cls.screen.blit(img, (x, y))
+        self.screen.blit(img, (x, y))
 
-    @classmethod
-    def draw_board(cls):
-        cls.screen.fill(bg)
-        pyg.draw.line(cls.screen, white, (0, cls.margin), (cls.screen_width, cls.margin))
+    def draw_board(self):
+        self.screen.fill(bg)
+        pyg.draw.line(self.screen, white, (0, self.margin), (self.screen_width, self.margin))
 
-    @classmethod
-    def create_sprites(cls):
+    def create_sprites(self):
         # Instantiate the paddles and pong
-        player_paddle = Paddle(cls.screen_width - 40, cls.screen_height // 2)
-        ai_paddle = Paddle(20, cls.screen_height // 2)
-        pong = Ball(cls.screen_width - 60, cls.screen_height // 2 + 50)
+        player_paddle = Paddle(self.screen_width - 40, self.screen_height // 2)
+        ai_paddle = Paddle(20, self.screen_height // 2)
+        pong = Ball(self.screen_width - 60, self.screen_height // 2 + 50)
 
         return player_paddle, ai_paddle, pong
 
-    @classmethod
-    def start_game(cls):
-        player_paddle, ai_paddle, pong = cls.create_sprites()
-        clock = pyg.time.Clock()
-        player_score = cls.player_score
-        ai_score = cls.ai_score
-        font = cls.font
-        screen_width = cls.screen_width
-        screen_height = cls.screen_height
-        margin = cls.margin
-        screen = cls.screen
-        live_ball = cls.live_ball
-        speed_increase = cls.speed_increase
-        winner = cls.winner
+    def handle_input(self, event, pong):
+        if event.type == pygame.QUIT:
+            self.run = False
+        elif event.type == pygame.MOUSEBUTTONDOWN and not self.live_ball:
+            self.live_ball = True
+            self.reset_ball(pong)
 
-        while cls.run:
+    def update_speed(self, pong):
+        if self.speed_increase > self.paddle_speed_increase_threshold:
+            self.speed_increase = 0
+            pong.speedX += 1 if pong.speedX > 0 else -1
+            pong.speedY += 1 if pong.speedY > 0 else -1
+            pong.max_Y_vel += 1
+
+    def start_game(self):
+        player_paddle, ai_paddle, pong = cls.create_sprites()
+
+        while self.run:
             # Ensures this loop runs 60 times per second
-            clock.tick(cls.FPS)
+            clock.tick(self.FPS)
 
             # Set board up
-            cls.draw_board()
-            cls.draw_text('AI: ' + str(ai_score), font, white, 20, 15)
-            cls.draw_text('Player: ' + str(player_score), font, white, screen_width - 125, 15)
-            cls.draw_text('BALL SPEED: ' + str(abs(pong.speedX)), font, white, screen_width // 2 - 100, 15)
+            self.draw_board()
+            self.draw_text('AI: ' + str(self.ai_score), 20, 15)
+            self.draw_text('Player: ' + str(self.player_score), self.screen_width - 125, 15)
+            self.draw_text('BALL SPEED: ' + str(abs(pong.speedX)), self.screen_width // 2 - 100, 15)
 
-            player_paddle.draw(screen)
-            ai_paddle.draw(screen)
+            player_paddle.draw(self.screen)
+            ai_paddle.draw(self.screen)
 
-            if live_ball:
-                speed_increase += 1
-                winner = pong.move(margin, screen_width, screen_height, player_paddle, ai_paddle)
-                if winner == 0:
-                    player_paddle.move(margin, screen_height)
-                    ai_paddle.ai(margin, screen_height, pong)
-                    pong.draw(screen)
+            if self.live_ball:
+                self.speed_increase += 1
+                self.winner = pong.move(self.margin, self.screen_width, self.screen_height, player_paddle, ai_paddle)
+                if self.winner == 0:
+                    player_paddle.move(self.margin, self.screen_height, pong)
+                    ai_paddle.move(self.margin, self.screen_height, pong)
+                    pong.draw(self.screen)
                 else:
-                    live_ball = False
-                    if winner == 1:
-                        player_score += 1
+                    self.live_ball = False
+                    if self.winner == 1:
+                        self.player_score += 1
                     else:
-                        ai_score += 1
+                        self.ai_score += 1
 
-            if not live_ball:
-                if winner == 0:
-                    cls.draw_text('CLICK ANYWHERE TO START', font, white, 100, screen_height // 2 - 100)
-                if winner == 1:
-                    cls.draw_text('YOU SCORED!', font, white, 220, screen_height // 2 - 100)
-                    cls.draw_text('CLICK ANYWHERE TO START', font, white, 100, screen_height // 2 - 50)
-                if winner == -1:
-                    cls.draw_text('AI SCORED!', font, white, 220, screen_height // 2 - 100)
-                    cls.draw_text('CLICK ANYWHERE TO START', font, white, 100, screen_height // 2 - 50)
+            if not self.live_ball:
+                if self.winner == 0:
+                    self.draw_text('CLICK ANYWHERE TO START', self.font, self.white, 100, self.screen_height // 2 - 100)
+                if self.winner == 1:
+                    self.draw_text('YOU SCORED!', self.font, self.white, 220, self.screen_height // 2 - 100)
+                    self.draw_text('CLICK ANYWHERE TO START', self.font, self.white, 100, self.screen_height // 2 - 50)
+                if self.winner == -1:
+                    self.draw_text('AI SCORED!', self.font, self.white, 220, self.screen_height // 2 - 100)
+                    self.draw_text('CLICK ANYWHERE TO START', self.font, self.white, 100, self.screen_height // 2 - 50)
 
-            for event in pyg.event.get():
-                if event.type == pyg.QUIT:
-                    cls.run = False
-                if event.type == pygame.MOUSEBUTTONDOWN and not live_ball:
-                    live_ball = True
-                    pong.reset(screen_width - 60, screen_height // 2 + 50)
+             for event in pygame.event.get():
+                self.handle_input(event, pong)
 
-            if speed_increase > 500:
-                speed_increase = 0
-                if pong.speedX < 0:
-                    pong.speedX -= 1
-                if pong.speedX > 0:
-                    pong.speedX += 1
-
-                if pong.speedY < 0:
-                    pong.speedY -= 1
-                    pong.max_Y_vel += 1
-                if pong.speedY > 0:
-                    pong.speedY += 1
-                    pong.max_Y_vel += 1
-
+            self.update_speed(pong)
             pyg.display.update()
 
         pyg.quit()
