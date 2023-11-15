@@ -80,36 +80,37 @@ The game follows a standard game loop structure with the following stages:
 
 #### `__init__`
 
-The `__init__` method initializes a `Paddle` object with the specified parameters.
+The `__init__` method initializes a `Paddle` object with the specified parameters. When the object is instantiated, it takes in an X and Y coordinate as its start point. 
 
 ```python
-def __init__(self, x, y, width, height, color, speed):
-    """Initialize Paddle object."""
-    self.rect = pygame.Rect(x, y, width, height)
-    self.color = color
-    self.speed = speed
+def __init__(self, x, y):
+        self.x = x  
+        self.y = y 
+        self.width = 20
+        self.height = 100
+        self.rect = pyg.Rect((self.x, self.y, self.width, self.height))
+        self.speed = 5
 ```
 
 #### `move`
 
-The `move` method adjusts the paddle's position based on the given direction.
+The `move` method adjusts the paddle's position based on the given direction. This is used inside the Game class `handle_paddle_movement`, moving the paddle's direction using Pygame's built-in function `move_ip()`.
 
 ```python
-def move(self, direction):
-    """Move the paddle based on the given direction."""
-    self.rect.y += direction * self.speed
-    # Ensure the paddle stays within the screen boundaries
-    self.rect.y = max(0, min(self.rect.y, SCREEN_HEIGHT - self.rect.height))
+def move(self, up):
+    if up:
+        self.rect.move_ip(0, -1 * self.speed)  # x,y
+    if not up:
+        self.rect.move_ip(0, self.speed)  # x,y
 ```
 
 #### `draw`
 
-The `draw` method draws the paddle on the given surface.
+The `draw` method draws the paddle on the given window.
 
 ```python
-def draw(self, surface):
-    """Draw the paddle on the given surface."""
-    pygame.draw.rect(surface, self.color, self.rect)
+def draw(self, screen):
+        pyg.draw.rect(screen, (255, 255, 255), self.rect)
 ```
 
 ### Ball
