@@ -197,5 +197,6 @@ class Game:
 
         pyg.quit()
 
+
 game = Game()
 game.start_game()
