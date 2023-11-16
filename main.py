@@ -38,7 +38,7 @@ class PongGame:
                 self.left_paddle.move(False)
 
             self.game.loop()
-            print(self.game.player_score, self.game.ai_score)
+            # print(self.game.player_score, self.game.ai_score)
             self.game.draw_board()
             pyg.display.update()
 
@@ -85,7 +85,7 @@ class PongGame:
             elif decision2 == 2 and self.right_paddle.rect.bottom < self.game.screen_height:
                 self.right_paddle.move(False)
 
-            print(output1, output2)
+            # print(output1, output2)
 
             self.game.loop()
             self.game.draw_board()
@@ -124,9 +124,9 @@ def eval_genomes(genomes, config):
 
 def run_neat(config):
     # Setting up the population
-    # p = neat.Checkpointer.restore_checkpoint('neat-checkpoint-1')
+    p = neat.Checkpointer.restore_checkpoint('neat-checkpoint-14')
     # For restoring checkpoints, comment out the next line
-    p = neat.Population(config)
+    # p = neat.Population(config)
     p.add_reporter(neat.StdOutReporter(True))
     stats = neat.StatisticsReporter()
     p.add_reporter(stats)
@@ -134,7 +134,7 @@ def run_neat(config):
 
     # Takes all genomes in the population and give a fitness.
     # The winner is the best fitness
-    winner = p.run(eval_genomes, 50)
+    winner = p.run(eval_genomes, 10)
 
     with open("best.pickle", "wb") as f:
         pickle.dump(winner, f)
@@ -162,5 +162,5 @@ if __name__ == "__main__":
                           config_path)
 
     # Once best is picked, comment line below out
-    run_neat(configs)
+    # run_neat(configs)
     test_ai(configs)
