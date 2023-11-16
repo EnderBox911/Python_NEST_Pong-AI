@@ -1,3 +1,5 @@
+import random
+
 import pygame as pyg
 from random import randint
 
@@ -34,14 +36,16 @@ class Paddle:
 class Ball:
     def __init__(self, x, y):
         self.reset(x, y)
+        # Setting random movements
+        self.speedY *= -1 if randint(0,2) == 1 else self.speedY
 
     def reset(self, x, y):
         self.x = x  # Start position
         self.y = y  # Start position
         self.radius = 8
         self.rect = pyg.Rect((self.x, self.y, self.radius * 2, self.radius * 2))
-        self.speedX = -5
-        self.speedY = 5  # Initial Y velocity of the ball
+        self.speedX = random.choice([-5, 5])
+        self.speedY = randint(2,5)  # Initial Y velocity of the ball
         self.max_Y_vel = self.speedY
         self.winner = 0  # 1 = player, -1 = ai
 
@@ -116,7 +120,6 @@ class Game:
         self.player_paddle, self.ai_paddle, self.pong = self.create_sprites()
 
     def draw_text(self, text, font, colour, x, y):
-        print()
         img = font.render(text, True, colour)
         self.screen.blit(img, (x, y))
 
@@ -134,11 +137,8 @@ class Game:
             # if game not start and no winners
             self.pong.draw(self.screen)
         elif not self.live_ball:
-            print(1)
             if self.winner == 0:
-                print(2)
                 self.draw_text('CLICK ANYWHERE TO START', self.font, self.white, 100, self.screen_height // 2 - 100)
-                print(3)
             if self.winner == 1:
                 self.draw_text('YOU SCORED!', self.font, self.white, 220, self.screen_height // 2 - 100)
                 self.draw_text('CLICK ANYWHERE TO START', self.font, self.white, 100, self.screen_height // 2 - 50)
@@ -150,7 +150,7 @@ class Game:
         # Instantiate the paddles and pong
         player_paddle = Paddle(self.screen_width - 40, self.screen_height // 2)
         ai_paddle = Paddle(20, self.screen_height // 2)
-        pong = Ball(self.screen_width - 60, self.screen_height // 2 + 50)
+        pong = Ball(self.screen_width // 2, self.screen_height // 2 + 50)
 
         return player_paddle, ai_paddle, pong
 
