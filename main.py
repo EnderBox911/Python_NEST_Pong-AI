@@ -124,9 +124,9 @@ def eval_genomes(genomes, config):
 
 def run_neat(config):
     # Setting up the population
-    p = neat.Checkpointer.restore_checkpoint('neat-checkpoint-1')
+    # p = neat.Checkpointer.restore_checkpoint('neat-checkpoint-1')
     # For restoring checkpoints, comment out the next line
-    # p = neat.Population(config)
+    p = neat.Population(config)
     p.add_reporter(neat.StdOutReporter(True))
     stats = neat.StatisticsReporter()
     p.add_reporter(stats)
@@ -148,7 +148,7 @@ def test_ai(config):
         winner = pickle.load(f)
 
     game = PongGame(screen, screen_width, screen_height)
-    game.test_ai(winner)
+    game.test_ai(winner, config)
 
 
 if __name__ == "__main__":
@@ -161,6 +161,6 @@ if __name__ == "__main__":
                           neat.DefaultStagnation,
                           config_path)
 
-    # Once best i picked, comment line below out
+    # Once best is picked, comment line below out
     run_neat(configs)
     test_ai(configs)
