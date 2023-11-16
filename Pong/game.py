@@ -43,7 +43,7 @@ class Ball:
         self.speedX = -5
         self.speedY = 5  # Initial Y velocity of the ball
         self.max_Y_vel = self.speedY
-        self.winner = 0  # 0 = player, -1 = ai
+        self.winner = 0  # 1 = player, -1 = ai
 
     def move(self, margin, screen_width, screen_height, player_paddle, ai_paddle):
         # Top and bottom border check
