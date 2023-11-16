@@ -190,7 +190,7 @@ class Game:
             self.speed_increase += 1
             self.winner = self.pong.move(self.margin, self.screen_width, self.screen_height, self.player_paddle, self.ai_paddle)
             if self.winner == 0:
-                self.handle_paddle_movement(self.ai_paddle, False)
+                # self.handle_paddle_movement(self.ai_paddle, False)
                 self.handle_paddle_movement(False, self.player_paddle)
             else:
                 self.live_ball = False
