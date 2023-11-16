@@ -80,77 +80,121 @@ The game follows a standard game loop structure with the following stages:
 
 #### `__init__`
 
-The `__init__` method initializes a `Paddle` object with the specified parameters.
+The `__init__` method initializes a `Paddle` object with the specified parameters. When the object is instantiated, it takes in an X and Y coordinate as its start point. 
 
 ```python
-def __init__(self, x, y, width, height, color, speed):
-    """Initialize Paddle object."""
-    self.rect = pygame.Rect(x, y, width, height)
-    self.color = color
-    self.speed = speed
+def __init__(self, x, y):
+        self.x = x  
+        self.y = y 
+        self.width = 20
+        self.height = 100
+        self.rect = pyg.Rect((self.x, self.y, self.width, self.height))
+        self.speed = 5
 ```
 
 #### `move`
 
-The `move` method adjusts the paddle's position based on the given direction.
+The `move` method adjusts the paddle's position based on the given direction. This is used inside the Game class `handle_paddle_movement`, moving the paddle's direction using Pygame's built-in function `move_ip()`, which takes an X and Y coordinate as it's parameters.
 
 ```python
-def move(self, direction):
-    """Move the paddle based on the given direction."""
-    self.rect.y += direction * self.speed
-    # Ensure the paddle stays within the screen boundaries
-    self.rect.y = max(0, min(self.rect.y, SCREEN_HEIGHT - self.rect.height))
+def move(self, up):
+    if up:
+        self.rect.move_ip(0, -1 * self.speed)  # x,y
+    if not up:
+        self.rect.move_ip(0, self.speed)  # x,y
 ```
 
 #### `draw`
 
-The `draw` method draws the paddle on the given surface.
+The `draw` method draws the paddle on the given window.
 
 ```python
-def draw(self, surface):
-    """Draw the paddle on the given surface."""
-    pygame.draw.rect(surface, self.color, self.rect)
+def draw(self, screen):
+        pyg.draw.rect(screen, (255, 255, 255), self.rect)
 ```
 
 ### Ball
 
 #### `__init__`
 
-The `__init__` method initializes a `Ball` object with the specified parameters.
+The `__init__` method initializes a `Ball` object with the specified parameters. As these variables are needed to be reset, it simply calls a method that initialises the same varibles it would have needed for an `__init__`. It passes the X and Y parameters into the `reset` method.
 
 ```python
-def __init__(self, x, y, radius, color, speed):
-    """Initialize Ball object."""
-    self.rect = pygame.Rect(x, y, 2 * radius, 2 * radius)
-    self.color = color
-    self.speed = speed
-    self.direction = [1, 1]  # Initial movement direction
+def __init__(self, x, y):
+        self.reset(x, y)
+```
+
+### `reset`
+
+The `reset` method resets the class's variables. This is used for when needing to restart the ball's position and speed. It takes in X and Y coordinates for it's starting point. SpeedX is the X-velocity and SpeedY is the Y-velocity of the ball. `self.winner` is automatically set as 0; When it turns 1, the player won the round; when it turns -1, the AI won the round.
+
+```python
+def reset(self, x, y):
+        self.x = x  # Start position
+        self.y = y  # Start position
+        self.radius = 8
+        self.rect = pyg.Rect((self.x, self.y, self.radius * 2, self.radius * 2))
+        self.speedX = -5
+        self.speedY = 5  # Initial Y velocity of the ball
+        self.max_Y_vel = self.speedY
+        self.winner = 0  # 1 = player, -1 = ai
 ```
 
 #### `move`
 
-The `move` method updates the ball's position based on its current direction.
+The `move` method updates the ball's position based on its current direction. It takes in the window dimentions and the paddles. If the built-in Pygame `colliderect()` detects a collision, it calls the `handle_paddle_collision` method. If it passes the left side of the screen, the player gets a point; If it passes the right, the AI gets a point.
 
 ```python
-def move(self):
-    """Move the ball."""
-    self.rect.x += self.speed * self.direction[0]
-    self.rect.y += self.speed * self.direction[1]
+def move(self, margin, screen_width, screen_height, player_paddle, ai_paddle):
+        # Top and bottom border check
+        if self.rect.top < margin or self.rect.bottom > screen_height:
+            self.speedY *= -1
 
-    # Reflect the ball if it hits the top or bottom of the screen
-    if self.rect.top <= 0 or self.rect.bottom >= SCREEN_HEIGHT:
-        self.direction[1] = -self.direction[1]
+        # Check for paddle collision
+        if self.rect.colliderect(player_paddle) or self.rect.colliderect(ai_paddle):
+            self.handle_paddle_collision(player_paddle, ai_paddle)
+
+        # Passes left side, user wins round
+        if self.rect.left < 0:
+            self.winner = 1
+
+        # Passes right side, AI wins round
+        if self.rect.right > screen_width:
+            self.winner = -1
+
+        # Adds speeds to ball
+        self.rect.x += self.speedX
+        self.rect.y += self.speedY
+
+        return self.winner
 ```
 
 #### `handle_collision`
 
-The `handle_collision` method checks for collisions with paddles and updates the ball's direction.
+The `handle_collision` method checks for collisions with paddles and updates the ball's direction. This calculates the Y-velocity depending on where it touches on the paddle. The closer it is to the middle, the Y-veloctity gets closer to 0. The farther it is, the Y-velocity gets closer to its max velocity.
 
 ```python
-def handle_collision(self, paddle):
-    """Handle collisions with paddles."""
-    if self.rect.colliderect(paddle.rect):
-        self.direction[0] = -self.direction[0]
+def handle_paddle_collision(self, player_paddle, ai_paddle):
+        self.speedX *= -1
+
+        # Getting which paddle collided
+        paddle = player_paddle if self.rect.colliderect(player_paddle) else ai_paddle
+
+        # Finding middle of paddle
+        middle_y = paddle.rect.y + paddle.height / 2
+
+        # Difference in Y axis of ball to middle of paddle
+        diff_in_y = middle_y - self.rect.y
+
+        # Farther from center of paddle = the Y velocity is greater. Finding the amount of Y velocity for each unit paddle length,
+        # meaning that if the ball hits the edge (the full length) of the paddle, it gives the maximum Y velocity
+        reducing_factor = (paddle.height / 2) / self.max_Y_vel
+
+        # Squeezes the difference in y to the range of the max velocity
+        y_vel = diff_in_y / reducing_factor
+
+        # Makes that the y velocity
+        self.speedY = -1 * y_vel
 ```
 
 #### `draw`
@@ -158,9 +202,8 @@ def handle_collision(self, paddle):
 The `draw` method draws the ball on the given surface.
 
 ```python
-def draw(self, surface):
-    """Draw the ball on the given surface."""
-    pygame.draw.circle(surface, self.color, self.rect.center, self.rect.width // 2)
+def draw(self, screen):
+        pyg.draw.circle(screen, (255, 255, 255), (self.rect.x + self.radius, self.rect.y + self.radius), self.radius)
 ```
 
 ### Game
