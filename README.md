@@ -210,14 +210,27 @@ def draw(self, screen):
 
 #### `__init__`
 
-The `__init__` method initializes a `Game` object.
+The `__init__` method initializes a `Game` object. Takes in the screen and it's width and height. This also initializes the paddles and the pong.
 
 ```python
-def __init__(self):
-    """Initialize Game object."""
-    # Initialize pygame
-    pygame.init()
-    # Other game initialization code...
+def __init__(self, screen_width, screen_height, screen):
+        self.screen_width = screen_width
+        self.screen_height = screen_height
+        self.margin = 50
+        self.screen = screen
+        pyg.display.set_caption('Pong')
+        self.clock = pyg.time.Clock()
+        self.live_ball = False
+        self.ai_score = 0
+        self.player_score = 0
+        self.FPS = 60
+        self.winner = 0
+        self.speed_increase = 0
+        self.font = pyg.font.SysFont('Constantia', 30)
+        self.run = True
+        self.white = (255, 255, 255)
+        self.bg = (50, 25, 50)
+        self.player_paddle, self.ai_paddle, self.pong = self.create_sprites()
 ```
 
 #### `draw_text`
