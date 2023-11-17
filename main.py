@@ -125,7 +125,7 @@ def eval_genomes(genomes, config):
 def run_neat(config):
     # Setting up the population
 
-    p = neat.Checkpointer.restore_checkpoint("ai_checkpoints/neat-checkpoint-49")
+    p = neat.Checkpointer.restore_checkpoint("ai_checkpoints/hard/neat-checkpoint-50")
     # For restoring checkpoints, comment out the next line
     # p = neat.Population(config)
 
@@ -134,22 +134,22 @@ def run_neat(config):
     p.add_reporter(stats)
 
     # Saves a checkpoint after X generations
-    p.add_reporter(neat.Checkpointer(1, filename_prefix='ai_checkpoints/neat-checkpoint-'))
+    p.add_reporter(neat.Checkpointer(1, filename_prefix='ai_checkpoints/hard/neat-checkpoint-'))
 
     # Takes all genomes in the population and give a fitness.
     # The winner is the best fitness
     winner = p.run(eval_genomes, 50)
 
-    with open("ai_checkpoints/best.pickle", "wb") as f:
+    with open("ai_checkpoints/hard/best.pickle", "wb") as f:
         print("Saved winner")
         pickle.dump(winner, f)
 
 
-def test_ai(config):
+def test_ai(config, difficulty):
     screen_width, screen_height = 600, 500
     screen = pyg.display.set_mode((screen_width, screen_height))
 
-    with open("ai_checkpoints/best.pickle", "rb") as f:
+    with open(f"ai_checkpoints/{difficulty}/best.pickle", "rb") as f:
         winner = pickle.load(f)
 
     game = PongGame(screen, screen_width, screen_height)
@@ -168,4 +168,4 @@ if __name__ == "__main__":
 
     # Once best is picked, comment line below out
     # run_neat(configs)
-    test_ai(configs)
+    test_ai(configs, "hard")
