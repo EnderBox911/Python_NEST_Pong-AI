@@ -117,11 +117,13 @@ def draw(self, screen):
 
 #### `__init__`
 
-The `__init__` method initializes a `Ball` object with the specified parameters. As these variables are needed to be reset, it simply calls a method that initialises the same varibles it would have needed for an `__init__`. It passes the X and Y parameters into the `reset` method.
+The `__init__` method initializes a `Ball` object with the specified parameters. As these variables are needed to be reset, it simply calls a method that initialises the same varibles it would have needed for an `__init__`. It passes the X and Y parameters into the `reset` method. It also randomises the direction of the bll when it spawns.
 
 ```python
 def __init__(self, x, y):
         self.reset(x, y)
+        # Setting random movements
+        self.speedY *= -1 if randint(0,2) == 1 else self.speedY
 ```
 
 ### `reset`
@@ -134,8 +136,8 @@ def reset(self, x, y):
         self.y = y  # Start position
         self.radius = 8
         self.rect = pyg.Rect((self.x, self.y, self.radius * 2, self.radius * 2))
-        self.speedX = -5
-        self.speedY = 5  # Initial Y velocity of the ball
+        self.speedX = random.choice([-5, 5])
+        self.speedY = randint(2,5)  # Initial Y velocity of the ball
         self.max_Y_vel = self.speedY
         self.winner = 0  # 1 = player, -1 = ai
 ```
@@ -169,12 +171,12 @@ def move(self, margin, screen_width, screen_height, player_paddle, ai_paddle):
         return self.winner
 ```
 
-#### `handle_collision`
+#### `handle_paddle_collision`
 
-The `handle_collision` method checks for collisions with paddles and updates the ball's direction. This calculates the Y-velocity depending on where it touches on the paddle. The closer it is to the middle, the Y-veloctity gets closer to 0. The farther it is, the Y-velocity gets closer to its max velocity.
+The `handle_paddle_collision` method checks for collisions with paddles and updates the ball's direction. This calculates the Y-velocity depending on where it touches on the paddle. The closer it is to the middle, the Y-veloctity gets closer to 0. The farther it is, the Y-velocity gets closer to its max velocity.
 
 ```python
-def handle_paddle_collision(self, player_paddle, ai_paddle):
+    def handle_paddle_collision(self, player_paddle, ai_paddle):
         self.speedX *= -1
 
         # Getting which paddle collided
@@ -186,7 +188,8 @@ def handle_paddle_collision(self, player_paddle, ai_paddle):
         # Difference in Y axis of ball to middle of paddle
         diff_in_y = middle_y - self.rect.y
 
-        # Farther from center of paddle = the Y velocity is greater. Finding the amount of Y velocity for each unit paddle length,
+        # Farther from center of paddle = the Y velocity is greater. When the ball hits the edge of the
+        # paddle, it reaches the maximum velocity. Finding the amount of Y velocity for each unit paddle length,
         # meaning that if the ball hits the edge (the full length) of the paddle, it gives the maximum Y velocity
         reducing_factor = (paddle.height / 2) / self.max_Y_vel
 
@@ -238,22 +241,39 @@ def __init__(self, screen_width, screen_height, screen):
 The `draw_text` method draws text on the screen.
 
 ```python
-def draw_text(self, text, size, x, y, color):
-    """Draw text on the screen."""
-    font = pygame.font.Font(None, size)
-    text_surface = font.render(text, True, color)
-    text_rect = text_surface.get_rect(center=(x, y))
-    self.screen.blit(text_surface, text_rect)
+    def draw_text(self, text, font, colour, x, y):
+        img = font.render(text, True, colour)
+        self.screen.blit(img, (x, y))
 ```
 
 #### `draw_board`
 
-The `draw_board` method draws the game board on the screen.
+The `draw_board` method draws the game board on the screen along with the appropriate text needed and the game start and ending text.
 
 ```python
 def draw_board(self):
-    """Draw the game board."""
-    # Other drawing code...
+    self.screen.fill(self.bg)
+    pyg.draw.line(self.screen, self.white, (0, self.margin), (self.screen_width, self.margin))
+    self.draw_text('AI: ' + str(self.ai_score), self.font, self.white, 20, 15)
+    self.draw_text('Player: ' + str(self.player_score), self.font, self.white, self.screen_width - 125, 15)
+    self.draw_text('BALL SPEED: ' + str(abs(self.pong.speedX)), self.font, self.white, self.screen_width // 2 - 100, 15)
+
+    self.player_paddle.draw(self.screen)
+    self.ai_paddle.draw(self.screen)
+
+    if self.live_ball and self.winner == 0:
+        # if game not start and no winners
+        self.pong.draw(self.screen)
+    elif not self.live_ball:
+        if self.winner == 0:
+            self.draw_text('CLICK ANYWHERE TO START', self.font, self.white, 100, self.screen_height // 2 - 100)
+        if self.winner == 1:
+            self.draw_text('YOU SCORED!', self.font, self.white, 220, self.screen_height // 2 - 100)
+            self.draw_text('CLICK ANYWHERE TO START', self.font, self.white, 100, self.screen_height // 2 - 50)
+        if self.winner == -1:
+            self.draw_text('AI SCORED!', self.font, self.white, 220, self.screen_height // 2 - 100)
+            self.draw_text('CLICK ANYWHERE TO START', self.font, self.white, 100, self.screen_height // 2 - 50)
+
 ```
 
 #### `create_sprites`
@@ -262,8 +282,12 @@ The `create_sprites` method creates game sprites (paddles and ball).
 
 ```python
 def create_sprites(self):
-    """Create game sprites."""
-    # Create paddle and ball objects...
+    # Instantiate the paddles and pong
+    player_paddle = Paddle(self.screen_width - 40, self.screen_height // 2)
+    ai_paddle = Paddle(20, self.screen_height // 2)
+    pong = Ball(self.screen_width // 2, self.screen_height // 2 + 50)
+
+    return player_paddle, ai_paddle, pong
 ```
 
 #### `reset_ball`
@@ -272,53 +296,77 @@ The `reset_ball` method resets the ball to its initial position.
 
 ```python
 def reset_ball(self):
-    """Reset the ball to its initial position."""
-    # Other reset code...
+    self.pong.reset(self.screen_width - 60, self.screen_height // 2 + 50)
 ```
 
 #### `handle_input`
 
-The `handle_input` method processes user input.
+The `handle_input` method processes user input for the game window.
 
 ```python
-def handle_input(self):
-    """Handle user input."""
-    # Other input handling code...
+def handle_input(self, event):
+    if event.type == pyg.QUIT:
+        self.run = False
+    elif event.type == pyg.MOUSEBUTTONDOWN and not self.live_ball:
+        self.live_ball = True
+        self.reset_ball()
 ```
 
 #### `update_speed`
 
-The `update_speed` method adjusts the game speed.
+The `update_speed` method is run every round, incrementing the speed of both the X and Y velocity by 1.
 
 ```python
 def update_speed(self):
-    """Adjust the game speed."""
-    # Other speed adjustment code...
+    pong = self.pong
+    if self.speed_increase > 500:
+        self.speed_increase = 0
+        pong.speedX += 1 if pong.speedX > 0 else -1
+        pong.speedY += 1 if pong.speedY > 0 else -1
+        pong.max_Y_vel += 1
 ```
 
 #### `handle_paddle_movement`
 
-The `handle
-
-_paddle_movement` method controls the movement of the paddles.
+The `handle_paddle_movement` method controls the movement of the paddles. It checks on if either the left or right paddle is being passed and depending on which paddle, it moves said paddle. This opens up to the possibility of the implementation of a player vs. player mode rather than with an AI.
 
 ```python
-def handle_paddle_movement(self):
-    """Control the movement of paddles."""
-    # Other paddle movement code...
+def handle_paddle_movement(self, left_paddle, right_paddle):
+    key = pyg.key.get_pressed()
+    if left_paddle:
+        if key[pyg.K_w] and left_paddle.rect.top > self.margin:
+            left_paddle.move(True)  # x,y
+        if key[pyg.K_s] and left_paddle.rect.bottom < self.screen_height:
+            left_paddle.move(False)  # x,y
+    if right_paddle:
+        if key[pyg.K_UP] and right_paddle.rect.top > self.margin:
+            right_paddle.move(True)  # x,y
+        if key[pyg.K_DOWN] and right_paddle.rect.bottom < self.screen_height:
+            right_paddle.move(False)  # x,y
 ```
 
 #### `loop`
 
-The `loop` method represents the main game loop.
+The `loop` method is the main game loop. It checks if the game is still ongoing, increses the speed and checks if the ball has passed through either side of the screen, thus checking for a winner. If there is no winner, it continues the game. If there is a winner, it stops the game and increments the points accordingly.
 
 ```python
 def loop(self):
-    """Main game loop."""
-    # Other loop code...
+    if self.live_ball:
+    self.speed_increase += 1
+    self.winner = self.pong.move(self.margin, self.screen_width, self.screen_height, self.player_paddle, self.ai_paddle)
+    if self.winner == 0:
+        # self.handle_paddle_movement(self.ai_paddle, False)
+        self.handle_paddle_movement(False, self.player_paddle)
+    else:
+        self.live_ball = False
+        if self.winner == 1:
+            self.player_score += 1
+        else:
+            self.ai_score += 1
+
+    self.update_speed()
 ```
 
-Feel free to use this documentation as a starting point and customize it based on your specific code or additional information.
 
 ## License
 
