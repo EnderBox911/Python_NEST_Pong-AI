@@ -81,6 +81,36 @@ The game follows a standard game loop structure with the following stages:
 4. **AI Logic**: Controls the AI paddle's movement.
 5. **Rendering**: Draws the game entities on the screen.
 
+The `run_game` function takes in a difficulty level and essentially starts the game with the player and the AI with the chosen difficulty.
+```python
+def run_game(config, difficulty):
+    screen_width, screen_height = 600, 500
+    screen = pyg.display.set_mode((screen_width, screen_height))
+
+    with open(f"ai_checkpoints/{difficulty}/best.pickle", "rb") as f:
+        winner = pickle.load(f)
+
+    game = PongGame(screen, screen_width, screen_height)
+    game.test_ai(winner, config)
+```
+
+The following section of code is to set up the configurations and call the `run_game` function to start the game.
+```
+if __name__ == "__main__":
+    local_dir = os.path.dirname(__file__)
+    config_path = os.path.join(local_dir, "config.txt")
+
+    configs = neat.Config(neat.DefaultGenome,
+                          neat.DefaultReproduction,
+                          neat.DefaultSpeciesSet,
+                          neat.DefaultStagnation,
+                          config_path)
+
+    # Line below is to train the AI model
+    # run_neat(configs)
+    run_game(configs, "hard")
+```
+
 ## Entities
 
 ### PongGame
