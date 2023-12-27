@@ -145,7 +145,7 @@ def run_neat(config):
         pickle.dump(winner, f)
 
 
-def test_ai(config, difficulty):
+def run_game(config, difficulty):
     screen_width, screen_height = 600, 500
     screen = pyg.display.set_mode((screen_width, screen_height))
 
@@ -168,4 +168,4 @@ if __name__ == "__main__":
 
     # Once best is picked, comment line below out
     # run_neat(configs)
-    test_ai(configs, "hard")
+    run_game(configs, "hard")
