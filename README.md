@@ -12,6 +12,13 @@ This is an attempt at creating an Ai using the NEST Python module.
 5. [Game Structure](#game-structure)
 6. [Game Loop](#game-loop)
 7. [Entities](#entities)
+   - [PongGame](#ponggame)
+        - [__init__](#__init__)
+        - [test_ai](#test_ai)
+        - [train_ai](#train_ai)
+        - [calculate_fitness](#calculate_fitness)
+        - [eval_genomes](#eval_genomes)
+        - [run_neat](#run_neat)
     - [Paddle](#paddle)
         - [__init__](#__init__)
         - [move](#move)
@@ -31,7 +38,7 @@ This is an attempt at creating an Ai using the NEST Python module.
         - [update_speed](#update_speed)
         - [handle_paddle_movement](#handle_paddle_movement)
         - [loop](#loop)
-8. [License](#license)
+9. [License](#license)
 
 ## Introduction
 
